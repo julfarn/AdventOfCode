@@ -1,9 +1,6 @@
 import re
 
-maximum ={}
-maximum["red"] = 12
-maximum["green"] = 13
-maximum["blue"] = 14
+maximum ={ "red": 12, "green": 13, "blue": 14}
 
 input_lines = open("input.txt", "r").readlines()
 
