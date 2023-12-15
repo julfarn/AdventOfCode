@@ -1,5 +1,5 @@
 
-input_lines = open("input_ex.txt").read().splitlines()
+input_lines = open("C:\\Users\\p1ux211\\AoC\\2023\\Day 12\\input.txt").read().splitlines()
 
 def gap_index(gap_lengths):
     idx = 0
@@ -60,6 +60,7 @@ def is_compatible(damaged, candidate):
 
 poss_sum = 0
 for line in input_lines:
+    line_sum = 0
     data,conseq_str = line.split(' ')
     conseqs_str = conseq_str.split(',')
     consecs = [int(c) for c in conseqs_str]
@@ -68,6 +69,8 @@ for line in input_lines:
 
     for i in range(gap_possib(len(consecs)+1, gap_sum)):
         if(is_compatible(data, string_from_lists(gap_lens(i,len(consecs)+1, gap_sum), consecs))):
-            poss_sum+=1
+            line_sum+=1
+    print("Line sum: " + str(line_sum))
+    poss_sum+= line_sum
 
 print(poss_sum)

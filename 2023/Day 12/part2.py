@@ -1,3 +1,4 @@
+import re
 
 input_lines = open("input_ex.txt").read().splitlines()
 
@@ -67,6 +68,64 @@ def is_compatible(damaged, candidate):
         if(damaged[i] != candidate[i]):
             return False
     return True
+
+
+
+def count_possibilities(data, seqs):
+    ## Rule out some obvious cases
+    if len(data) < sum(seqs)+ len(seqs)-1: return 0
+    if len(data) == sum(seqs)+ len(seqs)-1:
+        return ?? # 1 if '.' is precisely at the gaps, 0 otherwise
+
+    ## All seqs of same length? Then be smart
+
+    ## Where do the seqs of highest length fit in? 
+    # Find indices of longest sequences
+    longest_seq = max(seqs)
+    longest_ids = []
+    for i in range(len(seqs)):
+        if seqs[i] == longest_seq: longest_ids.append(i)
+
+    # Find strings of # and ? in data
+    m_it = re.finditer(r"([#?]+)", data)
+    data_seqs = []
+    for m in m_it:
+        if m.end()-m.start() >= longest_seq:
+            data_seqs.append({"data": m.group(), "start": m.start(), "end":m.end(), "len": m.end()-m.start()})
+    
+    ## For each possibility, cut up the data into several pieces and apply this function recursively
+    possib = 0
+    start_indices = possible_start_indices(longest_seq, len(longest_ids), data_seqs)
+    for starts in start_indices:
+        poss_of_these_startids = 1
+        for gap in range(len(longest_ids)+1):
+            gap_start, gap_len = 0, 0
+            gap_data = ""
+            gap_seqs = []
+            if gap == 0:
+                gap_start = 0
+                gap_len = starts[0]-1
+                gap_seqs = seqs[:longest_ids[0]]
+            elif gap == len(longest_ids):
+                gap_start = starts[-1] + longest_seq + 1
+                gap_len = len(data) - gap_start
+                gap_seqs = [longest_ids[-1]+1: ]
+            else:
+                gap_start = starts[gap-1] + longest_seq + 1
+                gap_len = starts[gap]-1 - gap_start
+                gap_seqs = 
+            
+            if(gap_len <= 0): gap_data = ''
+            else: gap_data = data[gap_start:gap_len]
+
+            if(this_gap_possibs == 0):
+                poss_of_these_startids = 0
+                break
+            poss_of_these_startids *= this_gap_possib
+        possib += poss_of_these_startids
+
+    
+    return possib
 
 poss_sum = 0
 for line in input_lines:
