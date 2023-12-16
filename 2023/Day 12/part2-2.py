@@ -1,9 +1,12 @@
 import re
 
-input_lines = open("C:\\Users\\p1ux211\\AoC\\2023\\Day 12\\input.txt").read().splitlines()
+input_lines = open("F:\\Projekte\\AdventOfCode\\2023\\Day 12\\input.txt").read().splitlines()
 
-
+gen_call_count = 0
+gen_dict = {}
 def count_possibilities(data, seqs):
+    global gen_call_count
+    gen_call_count += 1
     if len(seqs) == 0: 
         return 0 if '#' in data else 1
     if len(data) == 0: return 0
@@ -28,10 +31,22 @@ def count_possibilities(data, seqs):
             return 1  
         return 0
     
+    # Fixings at start and end
+    if (seqs[0] == 1):
+        if data.startswith('#?') or data.startswith('#.'):
+            return count_possibilities(data[2:], seqs[1:])
+        if data.startswith('?#?') or data.startswith('?#.'):
+            return count_possibilities(data[3:], seqs[1:])
+    if (seqs[-1] == 1):
+        if data.endswith('?#') or data.endswith('.#'):
+            return count_possibilities(data[:-2], seqs[:-1])
+        if data.endswith('?#?') or data.endswith('.#?'):
+            return count_possibilities(data[:-3], seqs[:-1])
+    
     # Is data a sequence of '?'? Treat this separately
     if (not '.' in data) and (not '#' in data):
         return count_possibilities_blank(len(data), seqs)
-    
+
     longest_seq = max(seqs)
     # return 0 if contains a '#'-chain longer than longest_seq
     long_m = re.search(r"#{" + str(longest_seq+1) + r"}", data)
@@ -42,7 +57,12 @@ def count_possibilities(data, seqs):
     if longest_seq == 1:
         return count_possibilities_singular(data, len(seqs))
 
-
+    # check in dictionary
+    #if(len(data)<12):
+    #    if(data in gen_dict):
+    #        if(tuple(seqs) in gen_dict[data]):
+    #            return gen_dict[data][tuple(seqs)]
+            
     ## Where do the seqs of highest length fit in? 
     # Find indices of longest sequences
     longest_ids = []
@@ -71,10 +91,20 @@ def count_possibilities(data, seqs):
         poss_with_this_startpos *= count_possibilities(data[start_pos + longest_seq + 1:], seqs[longest_ids[0]+1:])
         possib += poss_with_this_startpos
     
+
+    # add to dictionary
+    #if(len(data)<12):
+    #    if(not data in gen_dict):
+    #        gen_dict[data] = {}
+    #    gen_dict[data][tuple(seqs)] = possib
+
     return possib
 
 singular_dict = {}
+sing_call_count = 0
 def count_possibilities_singular(data, count, start=True):
+    global sing_call_count
+    sing_call_count+= 1
     if(count == 0): 
         return 1
     if(len(data) == 0): return 0
@@ -110,10 +140,13 @@ def count_possibilities_singular(data, count, start=True):
             return singular_dict[(data,count)]
 
     poss_sum = 0
-    for i in range(len(data)- (count-1)*2):
-        if data[i] == '.': continue
-        tmp_data = data[i+2:]
-        poss_sum += count_possibilities_singular(tmp_data, count-1, start=False)
+    #for i in range(len(data)- (count-1)*2):
+    #    if data[i] == '.': continue
+    #    tmp_data = data[i+2:]
+    #    poss_sum += count_possibilities_singular(tmp_data, count-1, start=False)
+    d = data.index('.') # index of first '.'
+    for i in range(max(0, count - int((len(data)-d)/2)), min(int(d/2), count)+1):
+        poss_sum += count_possibilities_blank_singular(d, i) * count_possibilities_singular(data[d+1:], count-i, start=False)
 
     if(len(data)<7):
         singular_dict[(data,count)] = poss_sum
@@ -124,11 +157,14 @@ def count_possibilities_blank(data_len, seqs):
     for seq in seqs: data_len -= seq-1
     return count_possibilities_blank_singular(data_len, len(seqs))
 
+blank_call_count = 0
 def count_possibilities_blank_singular(data_len, one_count):
+    global blank_call_count
+    blank_call_count += 1
+    if(one_count == 0): return 1
     if(one_count > 2*data_len-1): return 0
     if(one_count == 2*data_len-1): return 1
 
-    if(one_count == 0): return 1
     if(one_count == 1): return data_len
     if(one_count == 2):
         return (data_len - 2)*data_len - int(((data_len-2) * (data_len+1))/2)
@@ -150,9 +186,10 @@ for line in input_lines:
     
     consecs = consecs*5
     data = data + "?" + data + "?" + data + "?" + data + "?" + data
-
-    line_sum = (data, consecs)
-    print("Line " + str(line_nr) + " sum: " + str(line_sum))
+    
+    gen_call_count, sing_call_count, blank_call_count = 0,0,0
+    line_sum = count_possibilities(data, consecs)
+    print("Line " + str(line_nr) + " sum: " + str(line_sum) + ", gen calls: " + str(gen_call_count) + ", sing calls: " + str(sing_call_count) + ", blank calls: " + str(blank_call_count))
     poss_sum+= line_sum
 
 
