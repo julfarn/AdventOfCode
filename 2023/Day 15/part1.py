@@ -1,5 +1,5 @@
 
-input_strings = open("input_ex.txt").read().replace('\n', '').split(',')
+input_strings = open("F:\\Projekte\\AdventOfCode\\2023\\Day 15\\input_ex.txt").read().replace('\n', '').split(',')
 
 def hash(s):
     cuva = 0
