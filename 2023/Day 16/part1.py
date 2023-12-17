@@ -1,5 +1,5 @@
 
-input_strings = open("F:\\Projekte\\AdventOfCode\\2023\\Day 15\\input_ex.txt").read().splitlines()
+input_strings = open("C:\\Users\\p1ux211\\AoC\\2023\\Day 16\\input_ex.txt").read().splitlines()
 
 x_len = len(input_strings[0])
 y_len = len(input_strings)
@@ -35,6 +35,32 @@ def split(beam):
     elif beam['dir'] == 'e' or beam['dir'] == 'w':
         beam['dir'] = 'n'
         return {'x': beam['x'], 'y': beam['y'], 'dir': 's'}
+    
+def kill_condition(beam):
+    # kill a beam if it leaves the map
+    if not (0 <= beam['x'] < x_len and 0 <= beam['y'] < y_len):
+        return True
+    # kill a beam if it hits an energized splitter.
+    if energized_map [beam['y']][beam['x']] and input_strings[beam['y']][beam['x']] in '-|':
+        return True
+    return False
 
 while(len(beams)>0):
-    # kill a beam if it hits an energized splitter.
+    # propagate first
+    for beam in beams:
+        propagate(beam)
+    # kill beams
+    beams[:] = [beam for beam in beams if not kill_condition(beam)]
+    # reflect and split
+    for beam in beams:
+        if input_strings[beam['y']][beam['x']] in '\\/':
+            reflect(beam, input_strings[beam['y']][beam['x']])
+            continue
+        if (input_strings[beam['y']][beam['x']] == '-' and beam['dir'] in 'sn') or (input_strings[beam['y']][beam['x']] == '|' and beam['dir'] in 'ew'):
+            beams.append(split(beam))
+
+energized_sum = 0
+for l in energized_map:
+    for e in l:
+        if e: energized_sum+=1
+print(energized_sum)
