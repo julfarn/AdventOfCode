@@ -62,7 +62,16 @@ def count_possibilities(data, seqs):
     #    if(data in gen_dict):
     #        if(tuple(seqs) in gen_dict[data]):
     #            return gen_dict[data][tuple(seqs)]
-            
+    
+    possib = 0        
+    # are there any dots?
+    if '.' in data:
+        d = data.index('.')
+        for i in range(len(seqs)+1):
+            if (i -1 + sum(seqs[:i]) <= d) and (len(seqs) - i - 1 + sum(seqs[i:]) <= len(data)-d-1):
+                possib += count_possibilities(data[:d], seqs[:i]) * count_possibilities(data[d+1:], seqs[i:])
+        return possib
+
     ## Where do the seqs of highest length fit in? 
     # Find indices of longest sequences
     longest_ids = []
@@ -73,15 +82,15 @@ def count_possibilities(data, seqs):
     max_first_longest_pos = len(data) - sum(seqs[longest_ids[0]+1:]) - (len(seqs) -longest_ids[0]) - longest_seq +1
 
     # Find strings of # and ? in data
-    m_it = re.finditer(r"([#?]+)", data)
+    """m_it = re.finditer(r"([#?]+)", data)
     id_set = set([])
     for m in m_it:
         if m.end()-m.start() >= longest_seq:
             id_set = id_set | set(range(m.start(), m.end()-longest_seq+1))
     id_set = id_set & set(range(min_first_longest_pos, max_first_longest_pos+1))
-    start_pos_range = list(id_set)
+    start_pos_range = list(id_set)"""
+    start_pos_range = range(min_first_longest_pos, max_first_longest_pos+1)
 
-    possib = 0
     for start_pos in start_pos_range:
         if (start_pos != 0 and data[start_pos-1] == '#') or (start_pos != len(data)-longest_seq and data[start_pos + longest_seq] == '#'):
             continue
@@ -135,9 +144,23 @@ def count_possibilities_singular(data, count, start=True):
     if(hole_nr == len(data) == 2*count): #
         return count + 1
 
-    if(len(data)<7):
+    """if(len(data)<7):
         if((data, count) in singular_dict):
-            return singular_dict[(data,count)]
+            return singular_dict[(data,count)]"""
+    if data.startswith("?."): return count_possibilities_singular(data[2:], count) +  count_possibilities_singular(data[2:], count-1)
+    if data.endswith(".?"): return count_possibilities_singular(data[:-2], count) +  count_possibilities_singular(data[:-2], count-1)
+
+    if data.startswith("??."): return count_possibilities_singular(data[3:], count) + 2 * count_possibilities_singular(data[3:], count-1)
+    if data.endswith(".??"): return count_possibilities_singular(data[:-3], count) + 2 * count_possibilities_singular(data[:-3], count-1)
+
+    if ".?." in data:
+        x = data.index('.?.')
+        docdata = data[:x] + data[x+2:]
+        return count_possibilities_singular(docdata, count) + count_possibilities_singular(docdata, count-1)
+    if ".??." in data:
+        x = data.index('.??.')
+        docdata = data[:x] + data[x+3:]
+        return count_possibilities_singular(docdata, count) + 2* count_possibilities_singular(docdata, count-1)
 
     poss_sum = 0
     #for i in range(len(data)- (count-1)*2):
@@ -145,16 +168,17 @@ def count_possibilities_singular(data, count, start=True):
     #    tmp_data = data[i+2:]
     #    poss_sum += count_possibilities_singular(tmp_data, count-1, start=False)
     d = data.index('.') # index of first '.'
-    for i in range(max(0, count - int((len(data)-d)/2)), min(int(d/2), count)+1):
+    for i in range(max(0, count - int((len(data)-d)/2)), min(int(d/2)+1, count)+1):
         poss_sum += count_possibilities_blank_singular(d, i) * count_possibilities_singular(data[d+1:], count-i, start=False)
 
-    if(len(data)<7):
-        singular_dict[(data,count)] = poss_sum
+    """if(len(data)<7):
+        singular_dict[(data,count)] = poss_sum"""
 
     return poss_sum
 
 def count_possibilities_blank(data_len, seqs):
     for seq in seqs: data_len -= seq-1
+    #return count_possibilities_singular('?' * data_len, len(seqs), start=False)
     return count_possibilities_blank_singular(data_len, len(seqs))
 
 blank_call_count = 0
@@ -162,15 +186,15 @@ def count_possibilities_blank_singular(data_len, one_count):
     global blank_call_count
     blank_call_count += 1
     if(one_count == 0): return 1
-    if(one_count > 2*data_len-1): return 0
-    if(one_count == 2*data_len-1): return 1
+    if(2*one_count-1 > data_len): return 0
+    if(2*one_count-1 == data_len): return 1
 
     if(one_count == 1): return data_len
     if(one_count == 2):
         return (data_len - 2)*data_len - int(((data_len-2) * (data_len+1))/2)
     
     count_sum = 0
-    for i in range(2*one_count-2, data_len -1):
+    for i in range(2*one_count-3, data_len -1):
         count_sum += count_possibilities_blank_singular(i, one_count-1)
     return count_sum
 
