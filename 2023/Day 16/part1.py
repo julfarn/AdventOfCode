@@ -1,5 +1,5 @@
 
-input_strings = open("C:\\Users\\p1ux211\\AoC\\2023\\Day 16\\input_ex.txt").read().splitlines()
+input_strings = open("C:\\Users\\p1ux211\\AoC\\2023\\Day 16\\input.txt").read().splitlines()
 
 x_len = len(input_strings[0])
 y_len = len(input_strings)
@@ -51,13 +51,16 @@ while(len(beams)>0):
         propagate(beam)
     # kill beams
     beams[:] = [beam for beam in beams if not kill_condition(beam)]
-    # reflect and split
+    
+    # energize, reflect and split
     for beam in beams:
+        energized_map[beam['y']][beam['x']] = True
         if input_strings[beam['y']][beam['x']] in '\\/':
             reflect(beam, input_strings[beam['y']][beam['x']])
             continue
         if (input_strings[beam['y']][beam['x']] == '-' and beam['dir'] in 'sn') or (input_strings[beam['y']][beam['x']] == '|' and beam['dir'] in 'ew'):
             beams.append(split(beam))
+            print('A beam was split at (' + str(beam['x']) + ', '+ str(beam['y']) + ').')
 
 energized_sum = 0
 for l in energized_map:
