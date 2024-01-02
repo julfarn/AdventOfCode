@@ -23,3 +23,12 @@
 2023/Day 15/input_ex.txt
 2023/Day 16/input_ex.txt
 2023/Day 15/input.txt
+setup.py
+README.rst
+heapdict.py
+dist/HeapDict-1.0.1-py3.10.egg
+HeapDict.egg-info/dependency_links.txt
+HeapDict.egg-info/PKG-INFO
+HeapDict.egg-info/SOURCES.txt
+HeapDict.egg-info/top_level.txt
+HeapDict.egg-info/zip-safe
